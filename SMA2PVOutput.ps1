@@ -1,12 +1,12 @@
-﻿# SMA2PVOutput v2.0
-# Last updated 27/02/2015
+# SMA2PVOutput v2.1
+# Last updated 05/03/2022
 # Written by Neil Schofield (neil.schofield@sky.com)
 #
 # This Powershell script provides a means of exporting live and historic PV data
 # to PVOutput.org. Registering your PV system on PVoutput.org is a pre-requisite
 # to using SMA2PVOutput - see README.TXT.
 #
-# The script has been tested with Powershell 4.0.
+# The script has been tested with Powershell 7.2.
 #
 # Use Task Scheduler to run the script periodically during daylight hours, (say
 # every 15 minutes at 1 minute past the quarter hour). An end-of-day run can be
@@ -184,7 +184,7 @@ if ((test-path "$ExportPath\$PlantName-$Date.csv") -and (($MostRecentCSVTime -gt
             try
             {
                 # Post the batch of statuses to the web site
-                $Response = invoke-webrequest http://pvoutput.org/service/r2/addbatchstatus.jsp -Headers @{"X-Pvoutput-SystemID"=$SystemId;"X-Pvoutput-Apikey"=$ApiKey} -Body @{"data"=$($StatusArray[$ArrayIndex])} -outfile $ResponseLog -PassThru -UseBasicParsing -UseDefaultCredentials
+                $Response = invoke-webrequest https://pvoutput.org/service/r2/addbatchstatus.jsp -Headers @{"X-Pvoutput-SystemID"=$SystemId;"X-Pvoutput-Apikey"=$ApiKey} -Body @{"data"=$($StatusArray[$ArrayIndex])} -outfile $ResponseLog -PassThru
                 Add-Content $UploadLog "$(Get-Date -format g) Successfully uploaded batch of statuses for $Date between $BatchStart and $BatchEnd - $Response"
             }
             catch
@@ -212,7 +212,7 @@ if ((test-path "$ExportPath\$PlantName-$Date.csv") -and (($MostRecentCSVTime -gt
                 try
                 {
                     # Post the new status to the web site
-                    $Response = invoke-webrequest http://pvoutput.org/service/r2/addstatus.jsp -Headers @{"X-Pvoutput-SystemID"=$SystemId;"X-Pvoutput-Apikey"=$ApiKey} -Body @{"d"=$StatusDate;"t"=$StatusTime;"v1"=$Yield;"v2"=$InstPower} -outfile $ResponseLog -PassThru -UseBasicParsing -UseDefaultCredentials
+                    $Response = invoke-webrequest https://pvoutput.org/service/r2/addstatus.jsp -Headers @{"X-Pvoutput-SystemID"=$SystemId;"X-Pvoutput-Apikey"=$ApiKey} -Body @{"d"=$StatusDate;"t"=$StatusTime;"v1"=$Yield;"v2"=$InstPower} -outfile $ResponseLog -PassThru
                     Add-Content $UploadLog "$(Get-Date -format g) Uploading status for $StatusDate at $StatusTime succeeded: Yield=$Yield, InstPower=$InstPower - $Response"
                 }
                 catch
